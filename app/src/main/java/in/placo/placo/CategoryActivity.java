@@ -188,7 +188,7 @@ public class CategoryActivity extends AppCompatActivity {
                     "&ll=" + location +
                     "&limit=10"+
                     "&categoryId="+categoryId +
-                    "&radius=5000";
+                    "&radius=10000";
 
             Log.v("wtf","URL");
 
