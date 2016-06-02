@@ -341,8 +341,8 @@ public class MainActivity extends AppCompatActivity implements
         else {
             getCurrentLocation();
         }
-
     }
+
     @Override
     public void onConnectionFailed(@NonNull ConnectionResult connectionResult) {
 

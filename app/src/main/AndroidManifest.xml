@@ -23,6 +23,7 @@
         </activity>
         <activity android:name=".CategoryActivity"></activity>
         <activity android:name=".CheckInActivity"></activity>
+        <activity android:name=".VenueReviewsActivity"></activity>
 
         <meta-data
             android:name="com.google.android.gms.version"

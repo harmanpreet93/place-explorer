@@ -1,8 +1,7 @@
 package in.placo.placo;
 
-
-
 import android.app.Activity;
+import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.os.AsyncTask;
@@ -28,6 +27,7 @@ public class CategoryRecyclerViewAdapter extends RecyclerView
 //    private static MyClickListener myClickListener;
     private Activity mActivity;
 
+
     public static class DataObjectHolder extends RecyclerView.ViewHolder {
         TextView categoryName;
         TextView type;
@@ -40,13 +40,8 @@ public class CategoryRecyclerViewAdapter extends RecyclerView
             type = (TextView) itemView.findViewById(R.id.category_property);
             address = (TextView) itemView.findViewById(R.id.address);
             bgImage = (ImageView) itemView.findViewById(R.id.category_image);
-//            itemView.setOnClickListener(this);
         }
 
-//        @Override
-//        public void onClick(View v) {
-//            myClickListener.onItemClick(getPosition(), v);
-//        }
     }
 
 //    public void setOnItemClickListener(MyClickListener myClickListener) {
@@ -75,8 +70,6 @@ public class CategoryRecyclerViewAdapter extends RecyclerView
         holder.address.setText(mDataset.get(position).getAddress());
 
         AsyncImageLoader loadBgStyleImage = new AsyncImageLoader(mActivity,holder.bgImage);
-
-        Log.v("wtf","iconUrl: " + mDataset.get(position).getIconUrl());
         loadBgStyleImage.execute(mDataset.get(position).getIconUrl());
     }
 
@@ -95,9 +88,9 @@ public class CategoryRecyclerViewAdapter extends RecyclerView
         return mDataset.size();
     }
 
-    public interface MyClickListener {
-        void onItemClick(int position, View v);
-    }
+//    public interface MyClickListener {
+//        void onItemClick(int position, View v);
+//    }
 
     public class AsyncImageLoader extends AsyncTask<String,Void,Void> {
 

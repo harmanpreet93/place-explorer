@@ -3,13 +3,16 @@ package in.placo.placo;
 import android.app.AlertDialog;
 import android.content.Context;
 import android.content.DialogInterface;
+import android.content.Intent;
 import android.os.AsyncTask;
 import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.util.Log;
+import android.view.GestureDetector;
 import android.view.MenuItem;
+import android.view.MotionEvent;
 import android.view.View;
 import android.widget.ProgressBar;
 import android.widget.TextView;
@@ -75,6 +78,50 @@ public class CheckInActivity extends AppCompatActivity {
         return super.onOptionsItemSelected(item);
     }
 
+
+    public static class RecyclerTouchListener implements RecyclerView.OnItemTouchListener {
+
+        private GestureDetector gestureDetector;
+        private CategoryActivity.ClickListener clickListener;
+
+        public RecyclerTouchListener(Context context, final RecyclerView recyclerView, final CategoryActivity.ClickListener clickListener) {
+            this.clickListener = clickListener;
+            gestureDetector = new GestureDetector(context, new GestureDetector.SimpleOnGestureListener() {
+                @Override
+                public boolean onSingleTapUp(MotionEvent e) {
+                    return true;
+                }
+
+            });
+        }
+
+        @Override
+        public boolean onInterceptTouchEvent(RecyclerView rv, MotionEvent e) {
+
+            View child = rv.findChildViewUnder(e.getX(), e.getY());
+            if (child != null && clickListener != null && gestureDetector.onTouchEvent(e)) {
+                clickListener.onClick(child, rv.getChildPosition(child));
+            }
+            return false;
+        }
+
+        @Override
+        public void onTouchEvent(RecyclerView rv, MotionEvent e) {
+        }
+
+        @Override
+        public void onRequestDisallowInterceptTouchEvent(boolean disallowIntercept) {
+
+        }
+    }
+
+    private void openNewActivity(Class activityName,String id) {
+        Intent intent = new Intent(this,activityName);
+        intent.putExtra("venue_id",id);
+        startActivity(intent);
+    }
+
+
     public void showAlertDialog(Context context, String title, String message) {
         AlertDialog alertDialog = new AlertDialog.Builder(context).create();
 
@@ -86,9 +133,9 @@ public class CheckInActivity extends AppCompatActivity {
         alertDialog.setCancelable(false);
 
         // Setting OK Button
-        alertDialog.setOnCancelListener(new DialogInterface.OnCancelListener() {
+        alertDialog.setButton("Ok", new DialogInterface.OnClickListener() {
             @Override
-            public void onCancel(DialogInterface dialog) {
+            public void onClick(DialogInterface dialog, int which) {
                 finish();
             }
         });
@@ -146,24 +193,25 @@ public class CheckInActivity extends AppCompatActivity {
                 JSONArray categoryResponse = response.getJSONObject("response").getJSONArray("venues");
 
                 if(categoryResponse.length() > 0) {
-                    ArrayList<CategoryDataObject> results = new ArrayList<>();
-                    String name;
+                    final ArrayList<CategoryDataObject> results = new ArrayList<>();
+                    String name,id;
                     for (int i=0;i<categoryResponse.length();i++) {
                         CategoryDataObject obj;
                         name = categoryResponse.getJSONObject(i).getString("name");
+                        id = categoryResponse.getJSONObject(i).getString("id");
                         if(categoryResponse.getJSONObject(i).getJSONArray("categories").length()>0) {
                             JSONObject icon =  categoryResponse.getJSONObject(i).
                                     getJSONArray("categories").getJSONObject(0).
                                     getJSONObject("icon");
 
                             String iconUrl = icon.getString("prefix") + "bg_32" + icon.getString("suffix");
-                            obj = new CategoryDataObject(name,
+                            obj = new CategoryDataObject(id,name,
                                     categoryResponse.getJSONObject(i).getJSONArray("categories").getJSONObject(0).getString("name"),
                                     categoryResponse.getJSONObject(i).getJSONObject("location").getString("formattedAddress"),
                                     iconUrl);
                         }
                         else {
-                            obj = new CategoryDataObject(name,"",
+                            obj = new CategoryDataObject(id,name,"",
                                     categoryResponse.getJSONObject(i).getJSONObject("location").getString("formattedAddress")
                                     ,"");
                         }
@@ -178,6 +226,15 @@ public class CheckInActivity extends AppCompatActivity {
                     mRecyclerView.setLayoutManager(mLayoutManager);
                     mAdapter = new CategoryRecyclerViewAdapter(results, CheckInActivity.this);
                     mRecyclerView.setAdapter(mAdapter);
+
+                    mRecyclerView.addOnItemTouchListener(new RecyclerTouchListener(getApplicationContext(), mRecyclerView, new CategoryActivity.ClickListener() {
+                        @Override
+                        public void onClick(View view, int position) {
+                            CategoryDataObject obj = results.get(position);
+                            openNewActivity(VenueReviewsActivity.class,obj.getId());
+                        }
+
+                    }));
                 }
                 else {
                     progressBar.setVisibility(View.GONE);
